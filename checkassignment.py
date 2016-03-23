@@ -79,53 +79,55 @@ def test_line(registry, line):
     global found_error
     global seen_ids
 
+    dwfid = line['DWF_ID']
 
-    if line['DWF_ID'] in seen_ids:
-        print 'ID duplicate: %s' % line['DWF_ID']
+    # Some syntax checks on DWF IDs
+    if dwfid in seen_ids:
+        print 'ID duplicate: %s' % dwfid
         found_error = True
-    seen_ids.append(line['DWF_ID'])
+    seen_ids.append(dwfid)
 
-    split_id = line['DWF_ID'].split('-')
+    split_id = dwfid.split('-')
     if len(split_id) != 3:
-        print 'ID invalid: %s' % line['DWF_ID']
+        print 'ID invalid: %s' % dwfid
         found_error = True
         return
 
     if split_id[0] not in ['DWF']:
-        print 'ID not DWF: %s' % line['DWF_ID']
+        print 'ID not DWF: %s' % dwfid
         found_error = True
         return
 
     if len(split_id[2]) < 4:
-        print 'ID not N4+: %s' % line['DWF_ID']
+        print 'ID not N4+: %s' % dwfid
         found_error = True
         return
 
     try:
         int(split_id[1])
     except:
-        print 'ID field 1 not numeric: %s' % line['DWF_ID']
+        print 'ID field 1 not numeric: %s' % dwfid
         found_error = True
         return
 
     try:
         int(split_id[2])
     except:
-        print 'ID field 2 not numeric: %s' % line['DWF_ID']
+        print 'ID field 2 not numeric: %s' % dwfid
         found_error = True
         return
 
     # Check assigner
-    if not line['DWF_ID'] in EXCEPTIONS:
+    if not dwfid in EXCEPTIONS:
         dna = search_dna(registry, split_id[2])
         if not dna:
-            print 'Could not find assigner for %s' % line['DWF_ID']
+            print 'Could not find assigner for %s' % dwfid
             found_error = True
             return
         valid_assigners = dna['Valid Assigners']
         if not test_assigner(line['ASSIGNER'], valid_assigners):
             print '%s has incorrect assigner! Should be one of %s, is %s' % \
-                (line['DWF_ID'], valid_assigners, line['ASSIGNER'])
+                (dwfid, valid_assigners, line['ASSIGNER'])
             found_error = True
             return
 
