@@ -30,6 +30,7 @@ EXCEPTIONS = ['DWF-2016-89001']
 
 # We do this global
 found_error = False
+seen_ids = []
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -76,6 +77,13 @@ def test_assigner(assigner, valid_assigners):
 
 def test_line(registry, line):
     global found_error
+    global seen_ids
+
+
+    if line['DWF_ID'] in seen_ids:
+        print 'ID duplicate: %s' % line['DWF_ID']
+        found_error = True
+    seen_ids.append(line['DWF_ID'])
 
     split_id = line['DWF_ID'].split('-')
     if len(split_id) != 3:
@@ -90,6 +98,20 @@ def test_line(registry, line):
 
     if len(split_id[2]) < 4:
         print 'ID not N4+: %s' % line['DWF_ID']
+        found_error = True
+        return
+
+    try:
+        int(split_id[1])
+    except:
+        print 'ID field 1 not numeric: %s' % line['DWF_ID']
+        found_error = True
+        return
+
+    try:
+        int(split_id[2])
+    except:
+        print 'ID field 2 not numeric: %s' % line['DWF_ID']
         found_error = True
         return
 
