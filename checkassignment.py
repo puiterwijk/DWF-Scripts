@@ -28,6 +28,9 @@ import sys
 EXCEPTIONS = ['DWF-2016-89001']
 
 
+# We do this global
+found_error = False
+
 def parse_args():
     parser = argparse.ArgumentParser()
 
@@ -61,21 +64,26 @@ def search_dna(registry, iden):
 
 
 def test_line(registry, line):
+    global found_error
+
     split_id = line['DWF_ID'].split('-')
     if len(split_id) != 3:
         print 'Line invalid: %s' % line
-        sys.exit(2)
+        found_error = True
+        return
 
     # Check assigner
     if not line['DWF_ID'] in EXCEPTIONS:
         dna = search_dna(registry, split_id[2])
         if not dna:
             print 'Could not find assigner for %s' % line['DWF_ID']
-            print line
-            sys.exit(2)
+            found_error = True
+            return
         if dna['Email'] != line['ASSIGNER']:
             print '%s has incorrect assigner! Should be %s, is %s' % \
                 (line['DWF_ID'], dna['Email'], line['ASSIGNER'])
+            found_error = True
+            return
 
 
 def test_file(registry, filename):
@@ -110,6 +118,10 @@ def main():
     else:
         for filename in glob.glob('%s/DWF-Database-*.csv' % args.dwf_database_path):
             test_file(registry, filename)
+
+    if found_error:
+        print 'Errors were found and reported above'
+        sys.exit(2)
 
 
 if __name__ == '__main__':
