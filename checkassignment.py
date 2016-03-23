@@ -79,7 +79,17 @@ def test_line(registry, line):
 
     split_id = line['DWF_ID'].split('-')
     if len(split_id) != 3:
-        print 'Line invalid: %s' % line
+        print 'ID invalid: %s' % line['DWF_ID']
+        found_error = True
+        return
+
+    if split_id[0] not in ['DWF']:
+        print 'ID not DWF: %s' % line['DWF_ID']
+        found_error = True
+        return
+
+    if len(split_id[2]) < 4:
+        print 'ID not N4+: %s' % line['DWF_ID']
         found_error = True
         return
 
