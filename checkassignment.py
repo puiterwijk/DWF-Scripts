@@ -63,6 +63,17 @@ def search_dna(registry, iden):
             return dna
 
 
+def test_assigner(assigner, valid_assigners):
+    if assigner in valid_assigners:
+        # If we're in the valid assigners directly, we're done
+        return True
+    for valid in valid_assigner:
+        if valid.startswith('@') and assigner.endswith(valid):
+            # This was an authorized assigner domain (@example.com)
+            return True
+    return False
+
+
 def test_line(registry, line):
     global found_error
 
@@ -79,9 +90,10 @@ def test_line(registry, line):
             print 'Could not find assigner for %s' % line['DWF_ID']
             found_error = True
             return
-        if dna['Email'] != line['ASSIGNER']:
-            print '%s has incorrect assigner! Should be %s, is %s' % \
-                (line['DWF_ID'], dna['Email'], line['ASSIGNER'])
+        valid_assigners = dna['Valid Assigners']
+        if not test_assigner(line['ASSIGNER'], valid_assigners):
+            print '%s has incorrect assigner! Should be one of %s, is %s' % \
+                (line['DWF_ID'], valid_assigners, line['ASSIGNER'])
             found_error = True
             return
 
